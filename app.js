@@ -4,11 +4,9 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var graphqlHttp = require('express-graphql');
-var { buildSchema } = require('graphql');
 var mongoose = require('mongoose');
-var Event = require('./models/event');
-var User = require('./models/user');
-var bcrypt = require('bcryptjs');
+var graphqlSchema = require('./graphql/schema/index');
+var graphqlRootValue = require('./graphql/rootValue/index');
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
@@ -32,110 +30,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 
 app.use('/graphql', graphqlHttp({
-  schema: buildSchema(`
-    type Event {
-      _id: ID!
-      title: String!
-      description: String!
-      price: Float!
-      date: String!
-    }
-
-    type User {
-      _id: ID!
-      email: String!
-      password: String
-    }
-
-    input EventInput{
-      title: String!
-      description: String!
-      price: Float!
-      date: String!
-    }
-
-    input UserInput {
-      email: String!
-      password: String!
-    }
-
-    type RootQuery {
-      events: [Event!]!
-    }
-    type RootMutation {
-      createEvent(eventInput: EventInput): Event
-      createUser(userInput: UserInput): User
-    }
-    schema {
-      query:RootQuery
-      mutation: RootMutation
-    }
-  `),
-  rootValue: {
-    events: () => {
-      return Event.find({}).then(events => {
-        return events.map(event => {
-          return {...event._doc};
-        })
-      }).catch(err => {
-        console.log(err);
-      });
-    },
-    createEvent: (args) => {
-      var returnEvent = null;
-        const event = new Event({
-          title: args.eventInput.title,
-          description: args.eventInput.description,
-          price: args.eventInput.price,
-          date: new Date(args.eventInput.date),
-          creator: '5ced4faae3ee4419899865e4'
-        });
-        return event.save()
-        .then(re => {
-          console.log(re);
-          returnEvent = {...re._doc};
-          return User.findById('5ced4faae3ee4419899865e4')
-          
-        })
-        .then(user => {
-          console.log(user);
-          if(!user) {
-            throw new Error('user not found');
-          }
-          user.createdEvents.push(event)
-          return user.save();
-        })
-        .then(result => {
-          return returnEvent;
-        })
-        .catch(err => {
-          console.log(err);
-        });
-    },
-     createUser: args => {
-       return User.find({email: args.userInput.email}).then(user => {
-         console.log(user);
-         if(user.email){
-           throw new Error('user already exists');
-         }
-         return bcrypt.hash(args.userInput.password, 12)
-       })
-      .then(hash => {
-          var user = new User({
-            email: args.userInput.email,
-            password: hash
-          })
-
-         return user.save()
-       }).then(result => {
-         return {...result._doc, password: null};
-       })
-       .catch(err => {
-         throw err;
-       });
-      
-     }
-  },
+  schema: graphqlSchema,
+  rootValue: graphqlRootValue,
   graphiql: true
 }))
 app.use('/', indexRouter);
