@@ -7,6 +7,7 @@ var graphqlHttp = require('express-graphql');
 var mongoose = require('mongoose');
 var graphqlSchema = require('./graphql/schema/index');
 var graphqlRootValue = require('./graphql/rootValue/index');
+var isAuth = require('./middleware/is-auth');
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
@@ -16,6 +17,7 @@ var app = express();
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
+app.use(isAuth);
 
 //database connection
 var dbUri = 'mongodb://admin:admin123@ds263146.mlab.com:63146/booking'

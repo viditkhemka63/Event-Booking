@@ -54,20 +54,23 @@ module.exports = {
         console.log(err);
       });
     },
-    createEvent: (args) => {
+    createEvent: (args, req) => {
+      if(!req.isAuth){
+        throw new Error('not authenticated');
+      }
       var returnEvent = null;
         const event = new Event({
           title: args.eventInput.title,
           description: args.eventInput.description,
           price: args.eventInput.price,
           date: new Date(args.eventInput.date),
-          creator: '5ced4faae3ee4419899865e4'
+          creator: req.userId
         });
         return event.save()
         .then(re => {
           console.log(re);
           returnEvent = transformEvent(re)  ;
-          return User.findById('5ced4faae3ee4419899865e4')
+          return User.findById(req.userId)
           
         })
         .then(user => {
