@@ -7,6 +7,7 @@ git clone https://github.com/viditkhemka63/Event-Booking.git
 cd Event-Booking
 
 // For Backend
+cd backend
 npm install 
 npm start
 
