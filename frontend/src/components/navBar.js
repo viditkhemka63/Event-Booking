@@ -8,8 +8,8 @@ const MainNavigation = props => (
         {
             (context) => {
                 return(
-                    <nav className="navbar navbar-expand-lg navbar-light bg-light">
-                    <a className="navbar-brand" href="#">Navbar</a>
+                    <nav className="navbar navbar-expand-lg navbar-light bg-light fixed-top">
+                    <a className="navbar-brand" href="#">Event Booking </a>
                     <button className="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                         <span className="navbar-toggler-icon"></span>
                     </button>
@@ -28,6 +28,8 @@ const MainNavigation = props => (
                         </li>}
                         
                         </ul>
+                        {context.token && <button onClick={context.logout} className="btn btn-outline-success my-2 my-sm-0">Logout</button>}
+
                     </div>
                 </nav>
                 );

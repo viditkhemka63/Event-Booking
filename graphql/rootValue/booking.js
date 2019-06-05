@@ -75,13 +75,23 @@ module.exports = {
         }
        const fetchEvent = await Event.findById(args.eventId);
        console.log(fetchEvent);
-       const booking = new Booking({
-         user: req.userId,
-         event: fetchEvent
-       })
+       var isBooked = await Booking.find({user: req.userId, event: fetchEvent});
+       console.log(isBooked);
+       if(isBooked.length > 0) {
+          console.log('event not booked')
+          return new Error('event already booked');
+       }
 
-       const result = await booking.save();
-       return transformBooking(result);
+       const booking = new Booking({
+        user: req.userId,
+        event: fetchEvent
+      })
+
+      const result = await booking.save();
+      return transformBooking(result);
+       
+
+       
      }, 
     cancelBooking: async (args, req) =>{
         if(!req.isAuth){
